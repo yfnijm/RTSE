@@ -21,8 +21,7 @@ https://www.boost.org/doc/libs/1_77_0/libs/geometry/doc/html/index.html
 
 the basic API:
 
-:::info
-
+```
 model(): initial the R-tree data
 
 insert(obj): add object into the R-tree
@@ -33,7 +32,7 @@ intersects(box): search the objects intersect with the box
 
 covered_by(box): search the objects covered by the box
 
-:::
+```
 
 ## Engineering infrastructure
 - Language: C++, Python3 (Pytest for testing)
