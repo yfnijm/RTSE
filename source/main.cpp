@@ -1,12 +1,9 @@
 #include<bits/stdc++.h>
 
-class R_tree{
-	
+
+int main(){
 
 
 
-};
-
-
-
-
+	return 0;
+}
