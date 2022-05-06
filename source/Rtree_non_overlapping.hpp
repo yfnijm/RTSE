@@ -1,14 +1,19 @@
-#include<std/c++.h>
+#include<bits/stdc++.h>
 using namespace std;
 #define DIMENSION 2
 
-
+// The node's part
 class Node_non_overlapping{
 	private:
 		vector<int> m_coor1, m_coor2;
-	pubic:
+	public:
 		Node_non_overlapping(vector<int> data, int dim);
+		
 		bool operator== (Node_non_overlapping& cmp);
+		int operator[](size_t id) { 
+			return id < m_coor1.size() ? m_coor1[id] : m_coor2[id - m_coor1.size()];
+		}
+
 		vector<int> get_coor1(){ return m_coor1; }
 		vector<int> get_coor2(){ return m_coor2; }
 };
@@ -23,10 +28,9 @@ Node_non_overlapping::Node_non_overlapping(vector<int> coors, int dim){
 }
 
 
-Node_non_overlapping::operator== (Node_non_overlapping& cmp){
+bool Node_non_overlapping::operator== (Node_non_overlapping& cmp){
 	return m_coor1 == cmp.get_coor1() && m_coor2 == cmp.get_coor2();
 }
-
 
 struct cmp_node_non_overlapping{
 	bool operator()( Node_non_overlapping& n1, Node_non_overlapping& n2){
@@ -35,7 +39,7 @@ struct cmp_node_non_overlapping{
 };
 
 
-
+//The Rtree main Structure
 class Rtree_non_overlapping{
 	private:
 		int m_dim = DIMENSION;
@@ -49,44 +53,49 @@ class Rtree_non_overlapping{
 
 		map<int, vector<Node_non_overlapping>> m_tree;
 
-		map<Node_non_overlapping, vector<Node_non_overlapping>::iterator, > m_fast_find;
+		map<Node_non_overlapping, vector<Node_non_overlapping>::iterator> m_fast_find;
+		
 
 	public:
 		Rtree_non_overlapping(int dim) : m_dim(dim){};
-		Rtree_non_overlapping(vector<vector<int>>, int dim);
+		Rtree_non_overlapping(vector<vector<int>> init_data, int dim) : Rtree_non_overlapping(dim) 
+			{ insert_nodes(init_data); };
 		
-		void insert_nodes(vector<Node>, int dim);
-		vector<bool> search_nodes(Node);
-		vector<int> delete_nodes(Node*);
+		void insert_nodes(vector<vector<int>> data);
+		//vector<bool> search_nodes(Node);
+		void delete_nodes(vector<vector<int>> data);
+		vector<vector<Node_non_overlapping>> spatial_queries(vector<pair<vector<int>, int>> query_list);
 
+		vector<Node_non_overlapping> intersects(vector<int> spatial);
+		vector<Node_non_overlapping> covered_by(vector<int> spatial);
+		vector<Node_non_overlapping> disjoint(vector<int> spatial);
+		vector<Node_non_overlapping> overlaps(vector<int> spatial);
+		vector<Node_non_overlapping> within(vector<int> spatial);
 };
 
-Rtree_non_overlapping::Rtree_non_overlapping(vector<vector<int>> init_data, int dim){
-	for(auto& coors : init_data){
-		Node_non_overlapping cur_node(coors, m_dim);
-		m_tree(coors[refer_index]).push_back(cur_node);
-	}
-	Rtree_non_overlapping(dim);
-	insert(init_data, dim);
-}
-
-void Rtree_non_overlapping::insert_nodes(vector<vector<int>> data, int dim){
+void Rtree_non_overlapping::insert_nodes(vector<vector<int>> data){
 	for(auto& coors : data){
 		Node_non_overlapping cur_node(coors, m_dim);
-		m_tree(coors[m_refer_index]).push_back(cur_node);
+		m_tree[coors[m_refer_index]].push_back(cur_node);
 	}
 }
 
-//not finish
-void Rtree_non_overlapping::delete_nodes(vector<vector<int>> data, int dim){	
-	for(int i=0; i<data.size(); i++){
-		//Node_non_overlapping cur_node(coors, m_dim);
-		//m_tree(coors[m_refer_index]).push_back(cur_node);
+void Rtree_non_overlapping::delete_nodes(vector<vector<int>> data){	
+	for(auto& coors : data){
+		Node_non_overlapping tar_node(coors, m_dim);
+		auto& vec = m_tree[coors[m_refer_index]];
+		for(int i = 0; i < vec.size(); i++){
+			if(vec[i] == tar_node){
+				swap(vec[i], vec.back());
+				vec.pop_back();
+				break;
+			}
+		}
 	}
 }
 
 
-vector<vector<Node_non_overlapping*>> spatial_queries(vector<pair<vector<int>, int>> query_list, int dim){
+vector<vector<Node_non_overlapping>> Rtree_non_overlapping::spatial_queries(vector<pair<vector<int>, int>> query_list){
 	vector<vector<Node_non_overlapping>> res;
 	
 	for(auto& query : query_list){
@@ -106,7 +115,7 @@ vector<vector<Node_non_overlapping*>> spatial_queries(vector<pair<vector<int>, i
 			case 2:
 				find = disjoint(spatial);
 				break;
-
+			
 			case 3:
 				find = overlaps(spatial);
 				break;
@@ -121,28 +130,122 @@ vector<vector<Node_non_overlapping*>> spatial_queries(vector<pair<vector<int>, i
 }
 
 
-vector<Node_non_overlapping> Rtree_non_overlapping::insert_nodes(vector<int> hyperbox){
-	int ref_num = hyperbox[m_refer_index];
-	int bound = hyperbox[(m_refer_index + hyperbox.size() / 2) % hyperbox];
-	
-	auto it = m_tree.l
-	for(auto it = ){
-
-
-
-
+vector<Node_non_overlapping> Rtree_non_overlapping::intersects(vector<int> hyperbox){
+	vector<Node_non_overlapping> find;
+	auto it = m_tree.lower_bound(hyperbox[m_refer_index] - m_max_refer_length);
+	for(; it != m_tree.end() && it->first <= hyperbox[m_refer_index + m_dim]; it++){
+		for(auto& node : it->second){
+			int count = 0;
+			for(int i = 0; i < m_dim; i++){
+				if(node[i + m_dim] >= hyperbox[i] ||
+					node[i] <= hyperbox[i + m_dim]){
+					count++;
+					break;
+				}
+			}
+			if(count == m_dim) find.push_back(node);
+		}
 	}
+	return find;
+}
 
+vector<Node_non_overlapping> Rtree_non_overlapping::covered_by(vector<int> hyperbox){
+	vector<Node_non_overlapping> find;
+	auto it = m_tree.lower_bound(hyperbox[m_refer_index]);
+	for(; it != m_tree.end() && it->first <= hyperbox[m_refer_index + m_dim]; it++){
+		for(auto& node : it->second){
+			bool flag = true;
+			for(int i = 0; i < m_dim; i++){
+				if(node[i] >= hyperbox[i]){
+					flag = false;
+					break;
+				}
+			}
+			
+			for(int i = m_dim; i < m_dim + m_dim; i++){
+				if(node[i] <= hyperbox[i]){
+					flag = false;
+					break;
+				}
+			}
+		
+			for(int i = 0; i < m_dim; i++){
+				if(node[i] != hyperbox[i] && 
+					node[i + m_dim] != hyperbox[i + m_dim]){
+					flag = false;
+					break;
+				}
+			}
 
+			if(flag) find.push_back(node);
+		}
+	}
+	return find;
 }
 
 
+vector<Node_non_overlapping> Rtree_non_overlapping::disjoint(vector<int> hyperbox){
+	vector<Node_non_overlapping> find;
+	auto it = m_tree.begin();
+	for(; it != m_tree.end(); it++){
+		for(auto& node : it->second){
+			bool flag = false;
+			for(int i = 0; i < m_dim; i++){
+				if(node[i + m_dim] < hyperbox[i] ||
+					node[i] > hyperbox[i + m_dim]){
+					flag = true;
+					break;
+				}
+			}
+			if(flag) find.push_back(node);
+		}
+	}
+	return find;
+}
 
+vector<Node_non_overlapping> Rtree_non_overlapping::overlaps(vector<int> hyperbox){
+	vector<Node_non_overlapping> find;
+	auto it = m_tree.lower_bound(hyperbox[m_refer_index] - m_max_refer_length);
+	for(; it != m_tree.end() && it->first <= hyperbox[m_refer_index + m_dim]; it++){
+		for(auto& node : it->second){
+			int count = 0;
+			for(int i = 0; i < m_dim; i++){
+				if(node[i + m_dim] >= hyperbox[i] ||
+					node[i] <= hyperbox[i + m_dim]){
+					count++;
+					break;
+				}
+			}
+			if(count == m_dim) find.push_back(node);
+		}
+	}
+	return find;
+}
 
-
-
-
-
-
+vector<Node_non_overlapping> Rtree_non_overlapping::within(vector<int> hyperbox){
+	vector<Node_non_overlapping> find;
+	auto it = m_tree.lower_bound(hyperbox[m_refer_index]);
+	for(; it != m_tree.end() && it->first <= hyperbox[m_refer_index + m_dim]; it++){
+		for(auto& node : it->second){
+			bool flag = true;
+			for(int i = 0; i < m_dim; i++){
+				if(node[i] > hyperbox[i]){
+					flag = false;
+					break;
+				}
+			}
+			
+			for(int i = m_dim; i < m_dim + m_dim; i++){
+				if(node[i] <= hyperbox[i]){
+					flag = false;
+					break;
+				}
+			}
+			
+			if(flag) find.push_back(node);
+		}
+	}
+	return find;
+}
 
 
