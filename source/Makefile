@@ -7,7 +7,8 @@ all: $(TARGET)
 $(TARGET): _RTSE.cpp Rtree_non_overlapping.hpp
 	$(CXX) $(CXXFLAGS) `python3 -m pybind11 --includes` $< -o _RTSE`python3-config --extension-suffix` `python3-config --includes`
 
-test: 
+test:
+	#make
 	python3 -m pytest test.py
 
 clean: 
