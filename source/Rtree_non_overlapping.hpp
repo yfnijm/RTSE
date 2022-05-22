@@ -252,14 +252,14 @@ vector<Node_non_overlapping> Rtree_non_overlapping::within(vector<int> hyperbox)
 		for(auto& node : it->second){
 			bool flag = true;
 			for(int i = 0; i < m_dim; i++){
-				if(node[i] > hyperbox[i]){
+				if(node[i] <= hyperbox[i]){
 					flag = false;
 					break;
 				}
 			}
 			
 			for(int i = m_dim; i < m_dim + m_dim; i++){
-				if(node[i] <= hyperbox[i]){
+				if(node[i] >= hyperbox[i]){
 					flag = false;
 					break;
 				}
