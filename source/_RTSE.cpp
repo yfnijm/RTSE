@@ -14,12 +14,17 @@ PYBIND11_MODULE(_RTSE, m) {
 		//.def(pybind11::init<int>())
 		.def("get_coor1", &Node_non_overlapping::get_coor1)
 		.def("get_coor2", &Node_non_overlapping::get_coor2)
+		.def("print_node", &Node_non_overlapping::print_node)
 		;
 	pybind11::class_<Rtree_non_overlapping>(m, "Rtree_non_overlapping")
 		.def(pybind11::init<int>())
 		.def(pybind11::init<std::vector< std::vector<int>>, int>())
 		.def("insert_nodes", &Rtree_non_overlapping::insert_nodes)
 		.def("delete_nodes", &Rtree_non_overlapping::delete_nodes)
+		
+		.def("print_nodes", &Rtree_non_overlapping::print_nodes)	
+		.def("size", &Rtree_non_overlapping::size)	
+		
 		.def("spatial_queries", &Rtree_non_overlapping::spatial_queries)
 		//.def("__getitem__", &Matrix::getitem)
 		//.def("__setitem__", &Matrix::setitem)
