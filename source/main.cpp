@@ -6,7 +6,7 @@
 
 #include <bits/stdc++.h>
 #include "Rtree_non_overlapping.hpp"
-
+#include "Rtree.hpp"
 
 int main(){
 
