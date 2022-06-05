@@ -1,12 +1,13 @@
-# RTSE
+# (R)TSE
 ## Basic Information
 R-tree is a girdless data structure base on B-tree to speed up searches in space, *R* is stand for *Rectangle*. The average search time would be O(lg(n)) and n is the object number.
+
+Also, I use Red-Black tree to build another tree structure to compare the performance.
 
 ## Problem to solve
 To speed up the operation between target(box, segement , point) and the space, using the C++ code to implement the core function.
 
 To solve the most of EDA problem which only have a few layer, this project would focus on providing the 2D R-tree related API. And it would be usful to the placement and routing problem especially.
-
 
 ## Perspective users
 The student of EDA related Lab.
