@@ -56,11 +56,11 @@ class Rtree_non_overlapping{
 		int m_dim = DIMENSION;
 		
 		// the index for key
-		int m_refer_index = 0;
+		int m_refer_index = 1;
 
 		//know the max length need to search
 		int m_max_refer_length = 0;
-
+		int m_node_counter = 0;
 		map<int, vector<Node_non_overlapping>> m_tree;
 		map<Node_non_overlapping, vector<Node_non_overlapping>::iterator> m_fast_find;
 
@@ -73,7 +73,7 @@ class Rtree_non_overlapping{
 		//vector<bool> search_nodes(Node);
 		void delete_nodes(vector<vector<int>> data);
 		void print_nodes();
-		size_t size() { return m_tree.size(); };
+		size_t size() { return m_node_counter; };
 		vector<vector<Node_non_overlapping>> spatial_queries(vector<pair<vector<int>, int>> query_list);
 
 		vector<Node_non_overlapping> intersects(vector<int> spatial);
@@ -87,6 +87,8 @@ void Rtree_non_overlapping::insert_nodes(vector<vector<int>> data){
 	for(auto& coors : data){
 		Node_non_overlapping cur_node(coors, m_dim);
 		m_tree[coors[m_refer_index]].push_back(cur_node);
+
+		m_node_counter ++;
 	}
 }
 
@@ -98,6 +100,9 @@ void Rtree_non_overlapping::delete_nodes(vector<vector<int>> data){
 			if(vec[i] == tar_node){
 				swap(vec[i], vec.back());
 				vec.pop_back();
+
+
+				m_node_counter--;
 				break;
 			}
 		}

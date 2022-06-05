@@ -3,7 +3,7 @@ using namespace std;
 #define RTREE_MAX_SIZE 6
 #define RTREE_MIN_SIZE 1
 #define RTREE_REF 0
-#define RTREE_DIM 2
+#define RTREE_DIM 3
 
 int intlog(double base, double x) {
     return (int)(log(x) / log(base));
